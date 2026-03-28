@@ -17,3 +17,13 @@ scipy
 sounddevice
 soundfile
 whisper
+deep-translator
+flask
+gTTS
+numpy
+openai-whisper
+pydub
+scipy
+sounddevice
+soundfile
+gunicorn
