@@ -7,3 +7,13 @@ deep-translator
 gTTS
 pydub
 sounddevice
+deep-translator
+flask
+gTTS
+numpy
+openai-whisper
+pydub
+scipy
+sounddevice
+soundfile
+whisper
