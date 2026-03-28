@@ -355,25 +355,55 @@ footer {
   </div>
 
   <div class="card">
-    <div class="clabel">Recording</div>
-    <div class="micarea">
-      <div class="micwrap">
-        <button class="micbtn" id="micBtn">
-          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="clabel" style="margin-bottom:0">Input</div>
+      <div style="display:flex;gap:4px;background:var(--s2);border:1px solid var(--bdr);border-radius:8px;padding:3px">
+        <button id="tabRec" onclick="switchTab('rec')" style="background:var(--acc);border:none;color:#fff;border-radius:6px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:var(--font)">🎤 Record</button>
+        <button id="tabUp"  onclick="switchTab('up')"  style="background:none;border:none;color:var(--mut);border-radius:6px;padding:4px 14px;font-size:12px;cursor:pointer;font-family:var(--font)">📂 Upload</button>
+      </div>
+    </div>
+
+    <!-- Record panel -->
+    <div id="panelRec">
+      <div class="micarea">
+        <div class="micwrap">
+          <button class="micbtn" id="micBtn">
+            <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg>
+          </button>
+        </div>
+        <div class="wv" id="wv">
+          <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+          <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        </div>
+        <div class="reclabel" id="recLabel">Click the mic to start recording</div>
+        <div class="timerwrap" id="timerWrap">
+          <div class="timerfill" id="timerFill"></div>
+        </div>
+        <div class="durrow">
+          <label>Max duration</label>
+          <input type="range" id="durSlider" min="3" max="15" value="5" step="1">
+          <span class="durval" id="durVal">5s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload panel -->
+    <div id="panelUp" style="display:none">
+      <div style="text-align:center;padding:16px 0">
+        <input type="file" id="audioFile" accept="audio/*" style="display:none" onchange="handleUpload(this)">
+        <div id="dropZone" onclick="document.getElementById('audioFile').click()"
+          style="border:2px dashed var(--bdr2);border-radius:12px;padding:32px 20px;cursor:pointer;transition:border-color .2s"
+          ondragover="event.preventDefault();this.style.borderColor='var(--acc)'"
+          ondragleave="this.style.borderColor='var(--bdr2)'"
+          ondrop="event.preventDefault();this.style.borderColor='var(--bdr2)';handleUpload({files:event.dataTransfer.files})">
+          <div style="font-size:32px;margin-bottom:8px">🎵</div>
+          <div style="font-size:14px;color:var(--txt);margin-bottom:4px">Click to choose or drag & drop an audio file</div>
+          <div style="font-size:12px;color:var(--mut)">Supports WAV, MP3, OGG, M4A, WEBM</div>
+        </div>
+        <div id="uploadFileName" style="margin-top:12px;font-size:13px;color:var(--mut)"></div>
+        <button id="uploadBtn" onclick="submitUpload()" style="display:none;margin-top:12px;background:var(--acc);border:none;color:#fff;border-radius:10px;padding:10px 24px;font-size:14px;cursor:pointer;font-family:var(--font)">
+          Translate this file
         </button>
-      </div>
-      <div class="wv" id="wv">
-        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-        <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
-      </div>
-      <div class="reclabel" id="recLabel">Click the mic to start recording</div>
-      <div class="timerwrap" id="timerWrap">
-        <div class="timerfill" id="timerFill"></div>
-      </div>
-      <div class="durrow">
-        <label>Max duration</label>
-        <input type="range" id="durSlider" min="3" max="15" value="5" step="1">
-        <span class="durval" id="durVal">5s</span>
       </div>
     </div>
   </div>
@@ -535,6 +565,41 @@ function stopRec() {
 
   var blob = recorderObj.stop(); // returns WAV blob
   processAudio(blob);
+}
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  var isRec = tab === 'rec';
+  document.getElementById('panelRec').style.display = isRec ? 'block' : 'none';
+  document.getElementById('panelUp').style.display  = isRec ? 'none'  : 'block';
+  document.getElementById('tabRec').style.background = isRec ? 'var(--acc)' : 'none';
+  document.getElementById('tabRec').style.color      = isRec ? '#fff' : 'var(--mut)';
+  document.getElementById('tabUp').style.background  = isRec ? 'none' : 'var(--acc)';
+  document.getElementById('tabUp').style.color       = isRec ? 'var(--mut)' : '#fff';
+}
+
+// ── Audio file upload ──────────────────────────────────────────────────────────
+var uploadedFile = null;
+
+function handleUpload(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  uploadedFile = file;
+  document.getElementById('uploadFileName').textContent = '📄 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+  document.getElementById('uploadBtn').style.display = 'inline-block';
+}
+
+function submitUpload() {
+  if (!uploadedFile) return;
+  errBox.classList.remove('show');
+  setStatus('Uploading file...', 'loading');
+  pipeStep(0);
+  processAudio(uploadedFile);
+  // reset so user can upload again
+  document.getElementById('uploadFileName').textContent = '';
+  document.getElementById('uploadBtn').style.display = 'none';
+  document.getElementById('audioFile').value = '';
+  uploadedFile = null;
 }
 
 function processAudio(blob) {
