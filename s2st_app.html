@@ -74,11 +74,6 @@ main { width: 100%; max-width: 860px; padding: 32px 20px 80px; }
 .hero h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em; margin-bottom: 8px; }
 .hero h1 span { color: var(--acc); }
 .hero p { font-size: 14px; color: var(--mut); }
-.piperow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
-.pnode { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--s2); border: 1px solid var(--bdr); color: var(--mut); transition: all .3s; }
-.pnode.on { background: rgba(88,101,242,.15); border-color: rgba(88,101,242,.4); color: #a0aaff; }
-.pnode.ok { background: rgba(99,153,34,.15); border-color: rgba(99,153,34,.4); color: #a3d45a; }
-.parr { color: var(--bdr2); font-size: 14px; }
 .statsgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
 .scard { background: var(--s1); border: 1px solid var(--bdr); border-radius: 12px; padding: 14px; text-align: center; }
 .snum { font-size: 24px; font-weight: 600; color: var(--txt); }
@@ -264,14 +259,6 @@ input[type=range] { flex: 1; accent-color: var(--acc); cursor: pointer; height: 
   display: none;
 }
 .errmsg.show { display: block; }
-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 12px;
-  color: var(--mut);
-  border-top: 1px solid var(--bdr);
-  width: 100%;
-}
 </style>
 </head>
 <body>
@@ -289,17 +276,6 @@ footer {
 <main>
   <div class="hero">
     <h1>Speech to <span>Speech</span> Translation</h1>
-    <p>Mic → Noise Suppression → VAD → LID → ASR → Translation → TTS</p>
-  </div>
-
-  <div class="piperow" id="piperow">
-    <div class="pnode" id="p0">Mic</div><span class="parr">›</span>
-    <div class="pnode" id="p1">Noise filter</div><span class="parr">›</span>
-    <div class="pnode" id="p2">VAD</div><span class="parr">›</span>
-    <div class="pnode" id="p3">LID</div><span class="parr">›</span>
-    <div class="pnode" id="p4">ASR</div><span class="parr">›</span>
-    <div class="pnode" id="p5">Translate</div><span class="parr">›</span>
-    <div class="pnode" id="p6">TTS</div>
   </div>
 
   <div class="statsgrid">
@@ -471,7 +447,6 @@ footer {
   </div>
 </main>
 
-<footer>Pipeline: Mic → Noise Suppression → VAD → LID → ASR → Translation → TTS &nbsp;·&nbsp; S2ST v2</footer>
 
 <script>
 // language display names
@@ -751,18 +726,7 @@ function doCopy(id) {
 }
 
 function pipeStep(step) {
-  for (var i = 0; i < 7; i++) {
-    var el = document.getElementById('p' + i);
-    el.classList.remove('on', 'ok');
-    if (step < 0) {
-      // all done — mark all green
-      el.classList.add('ok');
-    } else if (i < step) {
-      el.classList.add('ok');
-    } else if (i === step) {
-      el.classList.add('on');
-    }
-  }
+  // pipeline display removed
 }
 
 function setStatus(msg, state) {
@@ -906,15 +870,6 @@ function buildWavBlob(samples, sampleRate) {
   return new Blob([buf], { type: 'audio/wav' });
 }
 
-// init pipeline display
-pipeStep(999); // nothing lit
-document.getElementById('p0').classList.remove('on','ok');
-document.getElementById('p1').classList.remove('on','ok');
-document.getElementById('p2').classList.remove('on','ok');
-document.getElementById('p3').classList.remove('on','ok');
-document.getElementById('p4').classList.remove('on','ok');
-document.getElementById('p5').classList.remove('on','ok');
-document.getElementById('p6').classList.remove('on','ok');
 </script>
 </body>
 </html>
