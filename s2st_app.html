@@ -3,560 +3,780 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Speech Translator</title>
+<title>S2ST Translator</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #1a1a2e;
-    color: #eee;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  h1 {
-    font-size: 26px;
-    margin-bottom: 4px;
-    color: #fff;
-  }
-
-  p.subtitle {
-    font-size: 13px;
-    color: #888;
-    margin-bottom: 30px;
-  }
-
-  .box {
-    background: #16213e;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 20px;
-    width: 100%;
-    max-width: 600px;
-    margin-bottom: 16px;
-  }
-
-  .box h2 {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #888;
-    margin: 0 0 14px 0;
-  }
-
-  .lang-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .lang-row select {
-    flex: 1;
-    background: #0f3460;
-    color: #eee;
-    border: 1px solid #444;
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-
-  .lang-row button {
-    background: #0f3460;
-    border: 1px solid #444;
-    color: #eee;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 18px;
-    cursor: pointer;
-  }
-
-  .lang-row button:hover {
-    background: #1a4a7a;
-  }
-
-  .mic-area {
-    text-align: center;
-    padding: 10px 0;
-  }
-
-  #micBtn {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: #e74c3c;
-    border: none;
-    cursor: pointer;
-    font-size: 30px;
-    color: white;
-    margin-bottom: 14px;
-    transition: transform 0.1s;
-  }
-
-  #micBtn:hover {
-    transform: scale(1.05);
-  }
-
-  #micBtn.recording {
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5); }
-    50% { box-shadow: 0 0 0 18px rgba(231, 76, 60, 0); }
-  }
-
-  #micLabel {
-    font-size: 14px;
-    color: #aaa;
-    margin-bottom: 14px;
-  }
-
-  .progress-bar {
-    height: 4px;
-    background: #333;
-    border-radius: 4px;
-    overflow: hidden;
-    display: none;
-    margin-bottom: 14px;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: #e74c3c;
-    width: 0%;
-    transition: width 0.1s linear;
-  }
-
-  .dur-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: #888;
-  }
-
-  .dur-row input {
-    flex: 1;
-    accent-color: #5865f2;
-  }
-
-  .dur-row span {
-    color: #5865f2;
-    font-weight: bold;
-    min-width: 28px;
-  }
-
-  #statusLine {
-    font-size: 13px;
-    color: #aaa;
-    text-align: center;
-    margin: 4px 0 12px;
-    min-height: 18px;
-  }
-
-  #errorBox {
-    background: rgba(231, 76, 60, 0.15);
-    border: 1px solid rgba(231, 76, 60, 0.4);
-    color: #ff8a89;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-size: 13px;
-    margin-bottom: 14px;
-    display: none;
-    max-width: 600px;
-    width: 100%;
-  }
-
-  .result-box {
-    display: none;
-    max-width: 600px;
-    width: 100%;
-  }
-
-  .text-block {
-    background: #0f3460;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  .text-block .label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: #888;
-    margin-bottom: 6px;
-  }
-
-  .text-block .content {
-    color: #eee;
-  }
-
-  .arrow {
-    text-align: center;
-    font-size: 20px;
-    color: #555;
-    margin: 4px 0;
-  }
-
-  .conf-bar {
-    height: 4px;
-    background: #333;
-    border-radius: 2px;
-    overflow: hidden;
-    margin: 4px 0;
-  }
-
-  .conf-fill {
-    height: 100%;
-    background: #2ecc71;
-    transition: width 0.4s;
-  }
-
-  .conf-label {
-    font-size: 11px;
-    color: #888;
-    margin-bottom: 12px;
-  }
-
-  .audio-section {
-    background: #0f3460;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-  }
-
-  .audio-section .label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: #888;
-    margin-bottom: 10px;
-  }
-
-  #audioPlayer {
-    width: 100%;
-    margin-top: 4px;
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-  }
-
-  .btn {
-    background: #1e2a5e;
-    border: 1px solid #444;
-    color: #eee;
-    border-radius: 8px;
-    padding: 9px 16px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  .btn:hover {
-    background: #2a3a7a;
-  }
-
-  .btn.primary {
-    background: #5865f2;
-    border-color: #5865f2;
-  }
-
-  .btn.primary:hover {
-    background: #4a55e0;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117;
+  --s1: #161b27;
+  --s2: #1e2435;
+  --s3: #262d42;
+  --bdr: rgba(255,255,255,0.08);
+  --bdr2: rgba(255,255,255,0.14);
+  --txt: #eef0f8;
+  --mut: #7c84a0;
+  --acc: #5865f2;
+  --red: #e24b4a;
+  --grn: #639922;
+  --grn2: #EAF3DE;
+  --amb: #EF9F27;
+  --font: 'Segoe UI', system-ui, sans-serif;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  width: 100%;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--bdr);
+  background: rgba(15,17,23,.9);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+.logo {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logio {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--acc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logio svg { width: 16px; height: 16px; fill: white; }
+.hbadge {
+  font-size: 11px;
+  color: var(--acc);
+  background: rgba(88,101,242,.12);
+  border: 1px solid rgba(88,101,242,.25);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+main { width: 100%; max-width: 860px; padding: 32px 20px 80px; }
+.hero { text-align: center; margin-bottom: 32px; }
+.hero h1 { font-size: clamp(24px, 4vw, 36px); font-weight: 600; letter-spacing: -.03em; margin-bottom: 8px; }
+.hero h1 span { color: var(--acc); }
+.hero p { font-size: 14px; color: var(--mut); }
+.piperow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 28px; }
+.pnode { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--s2); border: 1px solid var(--bdr); color: var(--mut); transition: all .3s; }
+.pnode.on { background: rgba(88,101,242,.15); border-color: rgba(88,101,242,.4); color: #a0aaff; }
+.pnode.ok { background: rgba(99,153,34,.15); border-color: rgba(99,153,34,.4); color: #a3d45a; }
+.parr { color: var(--bdr2); font-size: 14px; }
+.statsgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+.scard { background: var(--s1); border: 1px solid var(--bdr); border-radius: 12px; padding: 14px; text-align: center; }
+.snum { font-size: 24px; font-weight: 600; color: var(--txt); }
+.slbl { font-size: 11px; color: var(--mut); margin-top: 3px; }
+.card { background: var(--s1); border: 1px solid var(--bdr); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+.clabel { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--mut); margin-bottom: 16px; }
+.lrow { display: grid; grid-template-columns: 1fr 44px 1fr; gap: 12px; align-items: end; }
+.lgrp label { display: block; font-size: 12px; color: var(--mut); margin-bottom: 7px; }
+select {
+  width: 100%;
+  background: var(--s2);
+  color: var(--txt);
+  border: 1px solid var(--bdr2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 5 5-5' stroke='%237c84a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+  cursor: pointer;
+  transition: border-color .2s;
+}
+select:focus { border-color: rgba(88,101,242,.5); }
+select option { background: #1e2435; }
+.swapbtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--s2);
+  border: 1px solid var(--bdr2);
+  color: var(--mut);
+  cursor: pointer;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  transition: all .2s;
+}
+.swapbtn:hover { background: var(--s3); color: var(--txt); }
+.micarea { text-align: center; padding: 12px 0; }
+.micwrap { position: relative; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.micbtn {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: var(--red);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s, background .2s;
+  position: relative;
+  z-index: 1;
+}
+.micbtn:hover { transform: scale(1.06); }
+.micbtn.rec { animation: mpulse 1.4s ease-in-out infinite; }
+.micbtn svg { width: 28px; height: 28px; fill: white; }
+@keyframes mpulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(226,75,74,.4); }
+  50% { box-shadow: 0 0 0 16px rgba(226,75,74,0); }
+}
+.wv { display: flex; align-items: center; justify-content: center; gap: 3px; height: 28px; margin-bottom: 10px; }
+.wb { width: 3px; border-radius: 2px; background: var(--red); height: 4px; opacity: .2; }
+.wv.live .wb { opacity: 1; animation: wva .8s ease-in-out infinite; }
+.wb:nth-child(1) { animation-delay: 0s; }
+.wb:nth-child(2) { animation-delay: .1s; }
+.wb:nth-child(3) { animation-delay: .2s; }
+.wb:nth-child(4) { animation-delay: .15s; }
+.wb:nth-child(5) { animation-delay: .05s; }
+.wb:nth-child(6) { animation-delay: .25s; }
+.wb:nth-child(7) { animation-delay: .3s; }
+@keyframes wva { 0%, 100% { height: 4px; } 50% { height: 22px; } }
+.reclabel { font-size: 13px; color: var(--mut); margin-bottom: 16px; }
+.timerwrap { height: 3px; background: var(--s3); border-radius: 3px; overflow: hidden; margin-bottom: 14px; display: none; }
+.timerfill { height: 100%; background: var(--red); width: 0%; transition: width .1s linear; border-radius: 3px; }
+.durrow { display: flex; align-items: center; gap: 10px; }
+.durrow label { font-size: 12px; color: var(--mut); white-space: nowrap; }
+input[type=range] { flex: 1; accent-color: var(--acc); cursor: pointer; height: 4px; }
+.durval { font-size: 12px; font-weight: 500; min-width: 28px; color: var(--acc); }
+.srow { display: flex; align-items: center; gap: 8px; min-height: 32px; margin: 4px 0; justify-content: center; }
+.sdot { width: 7px; height: 7px; border-radius: 50%; background: var(--bdr2); transition: background .3s; flex-shrink: 0; }
+.sdot.loading { background: var(--amb); animation: blink .8s ease-in-out infinite; }
+.sdot.done { background: var(--grn); }
+.sdot.err { background: var(--red); }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.stxt { font-size: 13px; color: var(--mut); }
+.res { display: none; animation: sup .3s ease; }
+.res.show { display: block; }
+@keyframes sup { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.rblock { background: var(--s2); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; position: relative; }
+.rblabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--mut);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rbtxt { font-size: 15px; line-height: 1.6; color: var(--txt); }
+.cpybtn {
+  background: var(--s3);
+  border: 1px solid var(--bdr2);
+  color: var(--mut);
+  border-radius: 6px;
+  padding: 2px 9px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: var(--font);
+}
+.cpybtn:hover { color: var(--txt); }
+.divline { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; }
+.dl { flex: 1; height: 1px; background: var(--bdr); }
+.darr { font-size: 13px; color: var(--mut); background: var(--s2); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--bdr); }
+.confbar { height: 4px; background: var(--s3); border-radius: 2px; overflow: hidden; margin: 4px 0; }
+.conffill { height: 100%; background: var(--grn); border-radius: 2px; transition: width .5s; }
+.btnrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+.abtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--bdr2);
+  background: var(--s2);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--txt);
+  transition: all .15s;
+  font-family: var(--font);
+}
+.abtn:hover { background: var(--s3); }
+.abtn svg { width: 14px; height: 14px; fill: currentColor; flex-shrink: 0; }
+.abtn.pri { background: var(--acc); border-color: transparent; color: white; }
+.abtn.pri:hover { opacity: .88; }
+.abtn.grn { background: rgba(99,153,34,.15); border-color: rgba(99,153,34,.35); color: #a3d45a; }
+.abtn.grn:hover { background: rgba(99,153,34,.25); }
+.histitem { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bdr); }
+.histitem:last-child { border-bottom: none; padding-bottom: 0; }
+.hbadge2 {
+  background: rgba(88,101,242,.12);
+  border: 1px solid rgba(88,101,242,.25);
+  color: #a0aaff;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 10px;
+  height: fit-content;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.horig { font-size: 12px; color: var(--mut); margin-bottom: 2px; }
+.htrans { font-size: 13px; color: var(--txt); font-weight: 500; }
+.hplay {
+  background: none;
+  border: none;
+  color: var(--mut);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: color .2s;
+}
+.hplay:hover { color: #a3d45a; }
+.hplay svg { width: 14px; height: 14px; fill: currentColor; }
+.errmsg {
+  background: rgba(226,75,74,.1);
+  border: 1px solid rgba(226,75,74,.3);
+  color: #ff8a89;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  display: none;
+}
+.errmsg.show { display: block; }
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 12px;
+  color: var(--mut);
+  border-top: 1px solid var(--bdr);
+  width: 100%;
+}
 </style>
 </head>
 <body>
 
-<h1>Speech Translator</h1>
-<p class="subtitle">Speak in any language — hear it translated</p>
-
-<div class="box">
-  <h2>Languages</h2>
-  <div class="lang-row">
-    <select id="srcLang">
-      <option value="auto">Auto-detect</option>
-      <option value="en">English</option>
-      <option value="hi">Hindi</option>
-      <option value="fr">French</option>
-      <option value="es">Spanish</option>
-      <option value="de">German</option>
-      <option value="zh">Chinese</option>
-      <option value="ja">Japanese</option>
-      <option value="ar">Arabic</option>
-      <option value="pt">Portuguese</option>
-      <option value="ru">Russian</option>
-      <option value="ko">Korean</option>
-      <option value="te">Telugu</option>
-      <option value="ta">Tamil</option>
-      <option value="it">Italian</option>
-    </select>
-    <button onclick="swapLangs()">⇄</button>
-    <select id="tgtLang">
-      <option value="en">English</option>
-      <option value="hi" selected>Hindi</option>
-      <option value="fr">French</option>
-      <option value="es">Spanish</option>
-      <option value="de">German</option>
-      <option value="zh">Chinese</option>
-      <option value="ja">Japanese</option>
-      <option value="ar">Arabic</option>
-      <option value="pt">Portuguese</option>
-      <option value="ru">Russian</option>
-      <option value="ko">Korean</option>
-      <option value="te">Telugu</option>
-      <option value="ta">Tamil</option>
-      <option value="it">Italian</option>
-    </select>
+<header>
+  <div class="logo">
+    <div class="logio">
+      <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg>
+    </div>
+    S2ST Translator
   </div>
-</div>
+  <span class="hbadge">v2.0</span>
+</header>
 
-<div class="box">
-  <h2>Record</h2>
-  <div class="mic-area">
-    <button id="micBtn" onclick="toggleRec()">🎤</button>
-    <div id="micLabel">Click the mic to start recording</div>
-    <div class="progress-bar" id="progressBar">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
-    <div class="dur-row">
-      <span>Max duration:</span>
-      <input type="range" id="durSlider" min="3" max="15" value="5" step="1" oninput="document.getElementById('durVal').textContent = this.value + 's'">
-      <span id="durVal">5s</span>
-    </div>
+<main>
+  <div class="hero">
+    <h1>Speech to <span>Speech</span> Translation</h1>
+    <p>Mic → Noise Suppression → VAD → LID → ASR → Translation → TTS</p>
   </div>
-</div>
 
-<div id="statusLine">Ready</div>
-<div id="errorBox"></div>
+  <div class="piperow" id="piperow">
+    <div class="pnode" id="p0">Mic</div><span class="parr">›</span>
+    <div class="pnode" id="p1">Noise filter</div><span class="parr">›</span>
+    <div class="pnode" id="p2">VAD</div><span class="parr">›</span>
+    <div class="pnode" id="p3">LID</div><span class="parr">›</span>
+    <div class="pnode" id="p4">ASR</div><span class="parr">›</span>
+    <div class="pnode" id="p5">Translate</div><span class="parr">›</span>
+    <div class="pnode" id="p6">TTS</div>
+  </div>
 
-<div class="result-box" id="resultBox">
-  <div class="box">
-    <h2>Result</h2>
+  <div class="statsgrid">
+    <div class="scard"><div class="snum" id="sTotal">0</div><div class="slbl">Translations</div></div>
+    <div class="scard"><div class="snum" id="sLangs">0</div><div class="slbl">Languages used</div></div>
+    <div class="scard"><div class="snum" id="sTime">—</div><div class="slbl">Avg latency</div></div>
+  </div>
 
-    <div class="text-block">
-      <div class="label" id="origLabel">Original</div>
-      <div class="content" id="origText"></div>
-    </div>
-
-    <div class="conf-bar">
-      <div class="conf-fill" id="confFill" style="width:0%"></div>
-    </div>
-    <div class="conf-label" id="confLabel"></div>
-
-    <div class="arrow">↓</div>
-
-    <div class="text-block">
-      <div class="label" id="transLabel">Translation</div>
-      <div class="content" id="transText"></div>
-    </div>
-
-    <div class="audio-section">
-      <div class="label">Audio playback</div>
-      <audio id="audioPlayer" controls></audio>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn primary" onclick="replayAudio()">▶ Play again</button>
-      <button class="btn" onclick="saveText()">Save .txt</button>
-      <button class="btn" onclick="copyText()">Copy text</button>
-      <button class="btn" onclick="resetAll()">Record again</button>
+  <div class="card">
+    <div class="clabel">Language pair</div>
+    <div class="lrow">
+      <div class="lgrp">
+        <label>Source language</label>
+        <select id="srcL">
+          <option value="auto">Auto-detect</option>
+          <option value="en" selected>English</option>
+          <option value="hi">Hindi</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="de">German</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
+          <option value="ar">Arabic</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="ko">Korean</option>
+          <option value="te">Telugu</option>
+          <option value="ta">Tamil</option>
+          <option value="it">Italian</option>
+        </select>
+      </div>
+      <button class="swapbtn" id="swapBtn" title="Swap languages">⇄</button>
+      <div class="lgrp">
+        <label>Target language</label>
+        <select id="tgtL">
+          <option value="hi" selected>Hindi</option>
+          <option value="en">English</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="de">German</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
+          <option value="ar">Arabic</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="ko">Korean</option>
+          <option value="te">Telugu</option>
+          <option value="ta">Tamil</option>
+          <option value="it">Italian</option>
+        </select>
+      </div>
     </div>
   </div>
-</div>
+
+  <div class="card">
+    <div class="clabel">Recording</div>
+    <div class="micarea">
+      <div class="micwrap">
+        <button class="micbtn" id="micBtn">
+          <svg viewBox="0 0 24 24"><path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm6 10a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93V22h2v-3.07A8 8 0 0 0 20 11h-2z"/></svg>
+        </button>
+      </div>
+      <div class="wv" id="wv">
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+        <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+      </div>
+      <div class="reclabel" id="recLabel">Click the mic to start recording</div>
+      <div class="timerwrap" id="timerWrap">
+        <div class="timerfill" id="timerFill"></div>
+      </div>
+      <div class="durrow">
+        <label>Max duration</label>
+        <input type="range" id="durSlider" min="3" max="15" value="5" step="1">
+        <span class="durval" id="durVal">5s</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="srow" id="srow">
+    <div class="sdot" id="sdot"></div>
+    <span class="stxt" id="stxt">Ready</span>
+  </div>
+
+  <div class="errmsg" id="errBox"></div>
+
+  <div class="res card" id="resCard">
+    <div class="clabel">Result</div>
+    <div class="rblock">
+      <div class="rblabel">
+        <span>Original <span id="srcLangBadge" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mut)"></span></span>
+        <button class="cpybtn" onclick="doCopy('origSpan')">Copy</button>
+      </div>
+      <div class="rbtxt" id="origSpan"></div>
+    </div>
+
+    <div style="margin-bottom:6px">
+      <div style="font-size:11px;color:var(--mut)">Language confidence</div>
+      <div class="confbar"><div class="conffill" id="confFill" style="width:0%"></div></div>
+      <div style="font-size:11px;color:var(--mut);margin-top:2px" id="confTxt">—</div>
+    </div>
+
+    <div class="divline"><div class="dl"></div><div class="darr">↓</div><div class="dl"></div></div>
+
+    <div class="rblock">
+      <div class="rblabel">
+        <span id="transLbl">Translation</span>
+        <button class="cpybtn" onclick="doCopy('transSpan')">Copy</button>
+      </div>
+      <div class="rbtxt" id="transSpan"></div>
+    </div>
+
+    <div class="btnrow">
+      <button class="abtn pri" onclick="doPlay()">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play audio
+      </button>
+      <button class="abtn grn" onclick="doDownload()">
+        <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7z"/></svg>Save .txt
+      </button>
+      <button class="abtn" onclick="doReset()">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>Record again
+      </button>
+      <button class="abtn" onclick="doShare()">
+        <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>Share
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="histCard" style="display:none">
+    <div class="clabel">History <span id="histCount" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--mut)"></span></div>
+    <div id="histList"></div>
+    <button class="abtn" style="margin-top:12px;font-size:12px" onclick="clearHistory()">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>Clear history
+    </button>
+  </div>
+</main>
+
+<audio id="audioPlayer" style="display:none"></audio>
+
+<footer>Pipeline: Mic → Noise Suppression → VAD → LID → ASR → Translation → TTS &nbsp;·&nbsp; S2ST v2</footer>
 
 <script>
-var isRecording = false;
-var audioCtx = null;
-var recorder = null;
-var timerInterval = null;
-var currentAudioB64 = '';
-
-var LANG_NAMES = {
-  auto: 'Auto', en: 'English', hi: 'Hindi', fr: 'French',
-  es: 'Spanish', de: 'German', zh: 'Chinese', ja: 'Japanese',
-  ar: 'Arabic', pt: 'Portuguese', ru: 'Russian', ko: 'Korean',
-  te: 'Telugu', ta: 'Tamil', it: 'Italian'
+// language display names
+var LNAMES = {
+  auto:'Auto', en:'English', hi:'Hindi', fr:'French', es:'Spanish',
+  de:'German', ja:'Japanese', zh:'Chinese', ar:'Arabic', pt:'Portuguese',
+  ru:'Russian', ko:'Korean', te:'Telugu', ta:'Tamil', it:'Italian'
 };
 
-function swapLangs() {
-  var s = document.getElementById('srcLang');
-  var t = document.getElementById('tgtLang');
+// state
+var isRec = false;
+var audioCtx = null;
+var recorderObj = null;
+var timerInt = null;
+var lastAudioB64 = '';
+var lastTgtLang = 'hi';
+var hist = [];
+var stats = { total: 0, langs: {}, times: [] };
+
+// dom refs
+var micBtn    = document.getElementById('micBtn');
+var wvEl      = document.getElementById('wv');
+var recLabel  = document.getElementById('recLabel');
+var timerWrap = document.getElementById('timerWrap');
+var timerFill = document.getElementById('timerFill');
+var durSlider = document.getElementById('durSlider');
+var durVal    = document.getElementById('durVal');
+var sdot      = document.getElementById('sdot');
+var stxt      = document.getElementById('stxt');
+var resCard   = document.getElementById('resCard');
+var origSpan  = document.getElementById('origSpan');
+var transSpan = document.getElementById('transSpan');
+var errBox    = document.getElementById('errBox');
+
+durSlider.oninput = function() {
+  durVal.textContent = durSlider.value + 's';
+};
+
+document.getElementById('swapBtn').onclick = function() {
+  var s = document.getElementById('srcL');
+  var t = document.getElementById('tgtL');
   var sv = s.value === 'auto' ? 'en' : s.value;
   var tv = t.value;
   s.value = tv;
   t.value = sv;
-}
+};
 
-function toggleRec() {
-  if (isRecording) {
-    stopRec();
-  } else {
-    startRec();
-  }
-}
+micBtn.onclick = function() {
+  if (isRec) stopRec(); else startRec();
+};
 
 function startRec() {
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
-    audioCtx = new AudioContext({ sampleRate: 16000 });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
     var source = audioCtx.createMediaStreamSource(stream);
-    recorder = new WavRecorder(source);
-    recorder.start();
 
-    isRecording = true;
-    document.getElementById('micBtn').classList.add('recording');
-    document.getElementById('micLabel').textContent = 'Recording... click to stop early';
-    document.getElementById('progressBar').style.display = 'block';
-    document.getElementById('progressFill').style.width = '0%';
-    document.getElementById('errorBox').style.display = 'none';
-    setStatus('Recording audio...');
+    recorderObj = new WavRecorder(source);
+    recorderObj.start();
 
-    var maxMs = parseInt(document.getElementById('durSlider').value) * 1000;
-    var startTime = Date.now();
+    isRec = true;
+    micBtn.classList.add('rec');
+    wvEl.classList.add('live');
+    recLabel.textContent = 'Recording... click to stop early';
+    timerWrap.style.display = 'block';
+    timerFill.style.width = '0%';
+    errBox.classList.remove('show');
+    setStatus('Capturing audio...', 'loading');
+    pipeStep(0);
 
-    timerInterval = setInterval(function() {
-      var pct = Math.min((Date.now() - startTime) / maxMs * 100, 100);
-      document.getElementById('progressFill').style.width = pct + '%';
-      if (pct >= 100) {
-        stopRec();
-      }
+    var dur = parseInt(durSlider.value) * 1000;
+    var t0 = Date.now();
+    timerInt = setInterval(function() {
+      var pct = Math.min((Date.now() - t0) / dur * 100, 100);
+      timerFill.style.width = pct + '%';
+      if (pct >= 100) stopRec();
     }, 100);
 
   }).catch(function(err) {
+    setStatus('Mic access denied — allow microphone in browser settings', 'err');
     showError('Could not access microphone: ' + err.message);
   });
 }
 
 function stopRec() {
-  clearInterval(timerInterval);
-  isRecording = false;
-  document.getElementById('micBtn').classList.remove('recording');
-  document.getElementById('micLabel').textContent = 'Processing...';
-  document.getElementById('progressBar').style.display = 'none';
+  clearInterval(timerInt);
+  isRec = false;
+  micBtn.classList.remove('rec');
+  wvEl.classList.remove('live');
+  recLabel.textContent = 'Processing...';
+  timerWrap.style.display = 'none';
 
-  var wavBlob = recorder.stop();
-  sendAudio(wavBlob);
+  var blob = recorderObj.stop(); // returns WAV blob
+  processAudio(blob);
 }
 
-function sendAudio(blob) {
-  setStatus('Sending to server...');
+function processAudio(blob) {
+  var t0 = Date.now();
 
-  var tgtLang = document.getElementById('tgtLang').value;
+  // walk the pipeline visually with slight delays so the user can see progress
+  setStatus('Applying noise filter...', 'loading'); pipeStep(1);
+
+  setTimeout(function() {
+    setStatus('Checking for voice (VAD)...', 'loading'); pipeStep(2);
+  }, 300);
+  setTimeout(function() {
+    setStatus('Detecting language (LID)...', 'loading'); pipeStep(3);
+  }, 600);
+  setTimeout(function() {
+    setStatus('Transcribing (ASR)...', 'loading'); pipeStep(4);
+  }, 900);
+  setTimeout(function() {
+    setStatus('Translating...', 'loading'); pipeStep(5);
+  }, 1200);
+  setTimeout(function() {
+    setStatus('Generating speech (TTS)...', 'loading'); pipeStep(6);
+  }, 1500);
+
+  var tgtLang = document.getElementById('tgtL').value;
   var form = new FormData();
   form.append('audio', blob, 'recording.wav');
   form.append('target_lang', tgtLang);
 
   fetch('/translate', { method: 'POST', body: form })
-    .then(function(r) { return r.json(); })
+    .then(function(resp) { return resp.json(); })
     .then(function(data) {
       if (data.error) {
+        setStatus(data.error, 'err');
         showError(data.error);
-        setStatus('Error');
-        document.getElementById('micLabel').textContent = 'Click the mic to start recording';
+        recLabel.textContent = 'Click the mic to start recording';
+        pipeStep(-1);
         return;
       }
-      showResult(data);
+
+      // populate results
+      origSpan.textContent = data.original_text;
+      transSpan.textContent = data.translated_text;
+      document.getElementById('transLbl').textContent = 'Translation — ' + (LNAMES[data.tgt_lang] || data.tgt_lang);
+      document.getElementById('srcLangBadge').textContent = '(' + (LNAMES[data.src_lang] || data.src_lang) + ')';
+      document.getElementById('confFill').style.width = Math.round(data.confidence * 100) + '%';
+      document.getElementById('confTxt').textContent =
+        (LNAMES[data.src_lang] || data.src_lang) + ' — ' + Math.round(data.confidence * 100) + '% confidence';
+
+      resCard.style.display = 'block';
+      resCard.classList.add('show');
+      recLabel.textContent = 'Click the mic to start recording';
+      errBox.classList.remove('show');
+
+      var elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+      setStatus('Done — ' + elapsed + 's', 'done');
+      pipeStep(-1); // mark all done
+
+      // update stats
+      stats.total++;
+      stats.langs[data.tgt_lang] = true;
+      stats.times.push(parseFloat(elapsed));
+      updateStats();
+
+      // store for history replay and play button
+      lastAudioB64 = data.audio_b64;
+      lastTgtLang = data.tgt_lang;
+
+      addHist(data.original_text, data.translated_text, data.src_lang, data.tgt_lang, data.audio_b64);
+
+      // auto-play the result
+      playAudio(data.audio_b64);
     })
     .catch(function(err) {
+      setStatus('Server error — is the Flask server running?', 'err');
       showError('Request failed: ' + err.message);
-      setStatus('Error');
-      document.getElementById('micLabel').textContent = 'Click the mic to start recording';
+      recLabel.textContent = 'Click the mic to start recording';
+      pipeStep(-1);
     });
 }
 
-function showResult(data) {
-  document.getElementById('origLabel').textContent = 'Original — ' + (LANG_NAMES[data.src_lang] || data.src_lang);
-  document.getElementById('origText').textContent = data.original_text;
-
-  document.getElementById('transLabel').textContent = 'Translation — ' + (LANG_NAMES[data.tgt_lang] || data.tgt_lang);
-  document.getElementById('transText').textContent = data.translated_text;
-
-  var confPct = Math.round(data.confidence * 100);
-  document.getElementById('confFill').style.width = confPct + '%';
-  document.getElementById('confLabel').textContent = 'Language confidence: ' + confPct + '%';
-
-  // set up audio player with the mp3 data
-  currentAudioB64 = data.audio_b64;
-  var audioEl = document.getElementById('audioPlayer');
-  audioEl.src = 'data:audio/mp3;base64,' + data.audio_b64;
-  audioEl.load();
-
-  document.getElementById('resultBox').style.display = 'block';
-  document.getElementById('micLabel').textContent = 'Click the mic to start recording';
-  document.getElementById('errorBox').style.display = 'none';
-  setStatus('Done!');
-
-  // auto-play the translated audio
-  audioEl.play().catch(function(e) {
-    console.log('Autoplay blocked, user can click play:', e.message);
+function playAudio(b64) {
+  if (!b64) return;
+  var player = document.getElementById('audioPlayer');
+  player.src = 'data:audio/mp3;base64,' + b64;
+  player.load();
+  player.play().catch(function(e) {
+    console.warn('Autoplay blocked, user can press Play:', e.message);
   });
 }
 
-function replayAudio() {
-  var audioEl = document.getElementById('audioPlayer');
-  audioEl.currentTime = 0;
-  audioEl.play();
+function doPlay() {
+  if (!lastAudioB64) {
+    setStatus('No audio yet — record something first', 'err');
+    return;
+  }
+  setStatus('Playing...', 'loading');
+  playAudio(lastAudioB64);
 }
 
-function saveText() {
-  var orig = document.getElementById('origText').textContent;
-  var trans = document.getElementById('transText').textContent;
-  var content = 'Original:\n' + orig + '\n\nTranslation:\n' + trans;
-  var blob = new Blob([content], { type: 'text/plain' });
+function doDownload() {
+  var lines = [
+    'S2ST Translation',
+    '='.repeat(40),
+    '',
+    'Original:    ' + origSpan.textContent,
+    'Translated (' + (LNAMES[lastTgtLang] || lastTgtLang) + '):  ' + transSpan.textContent,
+    '',
+    'S2ST v2'
+  ].join('\n');
+  var b = new Blob([lines], { type: 'text/plain' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = URL.createObjectURL(b);
   a.download = 'translation.txt';
   a.click();
 }
 
-function copyText() {
-  var orig = document.getElementById('origText').textContent;
-  var trans = document.getElementById('transText').textContent;
-  navigator.clipboard.writeText('Original: ' + orig + '\nTranslation: ' + trans).then(function() {
-    setStatus('Copied to clipboard!');
+function doShare() {
+  var text = 'Original: ' + origSpan.textContent + '\nTranslated (' +
+    (LNAMES[lastTgtLang] || lastTgtLang) + '): ' + transSpan.textContent;
+  if (navigator.share) {
+    navigator.share({ title: 'S2ST Translation', text: text });
+  } else {
+    navigator.clipboard.writeText(text).then(function() {
+      setStatus('Copied to clipboard', 'done');
+    });
+  }
+}
+
+function doReset() {
+  resCard.classList.remove('show');
+  resCard.style.display = 'none';
+  errBox.classList.remove('show');
+  setStatus('Ready');
+  pipeStep(-1);
+}
+
+function doCopy(id) {
+  var el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).then(function() {
+    var btn = el.parentElement.querySelector('.cpybtn');
+    var old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = old; }, 1400);
   });
 }
 
-function resetAll() {
-  document.getElementById('resultBox').style.display = 'none';
-  document.getElementById('errorBox').style.display = 'none';
-  setStatus('Ready');
+function pipeStep(step) {
+  for (var i = 0; i < 7; i++) {
+    var el = document.getElementById('p' + i);
+    el.classList.remove('on', 'ok');
+    if (step < 0) {
+      // all done — mark all green
+      el.classList.add('ok');
+    } else if (i < step) {
+      el.classList.add('ok');
+    } else if (i === step) {
+      el.classList.add('on');
+    }
+  }
 }
 
-function setStatus(msg) {
-  document.getElementById('statusLine').textContent = msg;
+function setStatus(msg, state) {
+  stxt.textContent = msg;
+  sdot.className = 'sdot';
+  if (state === 'loading') sdot.classList.add('loading');
+  if (state === 'done')    sdot.classList.add('done');
+  if (state === 'err')     sdot.classList.add('err');
 }
 
 function showError(msg) {
-  var box = document.getElementById('errorBox');
-  box.textContent = '⚠ ' + msg;
-  box.style.display = 'block';
+  errBox.textContent = '⚠ ' + msg;
+  errBox.classList.add('show');
 }
 
-// ---- WAV Recorder ----
-// Records from the mic and builds a proper WAV blob at 16kHz
+function updateStats() {
+  document.getElementById('sTotal').textContent = stats.total;
+  document.getElementById('sLangs').textContent = Object.keys(stats.langs).length;
+  if (stats.times.length) {
+    var avg = stats.times.reduce(function(a, b) { return a + b; }, 0) / stats.times.length;
+    document.getElementById('sTime').textContent = avg.toFixed(1) + 's';
+  }
+}
+
+function addHist(orig, trans, srcL, tgtL, b64) {
+  hist.unshift({ orig: orig, trans: trans, srcL: srcL, tgtL: tgtL, b64: b64 });
+  if (hist.length > 10) hist.pop();
+  renderHist();
+}
+
+function renderHist() {
+  var card = document.getElementById('histCard');
+  var list = document.getElementById('histList');
+  if (!hist.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  document.getElementById('histCount').textContent = '(' + hist.length + ')';
+  list.innerHTML = hist.map(function(h, i) {
+    return '<div class="histitem">' +
+      '<span class="hbadge2">' + (LNAMES[h.srcL]||h.srcL) + ' → ' + (LNAMES[h.tgtL]||h.tgtL) + '</span>' +
+      '<div style="flex:1">' +
+        '<div class="horig">' + escHtml(h.orig) + '</div>' +
+        '<div class="htrans">' + escHtml(h.trans) + '</div>' +
+      '</div>' +
+      '<button class="hplay" onclick="replayHist(' + i + ')" title="Play audio">' +
+        '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
+      '</button>' +
+    '</div>';
+  }).join('');
+}
+
+function replayHist(i) {
+  var h = hist[i];
+  if (h && h.b64) playAudio(h.b64);
+}
+
+function clearHistory() {
+  hist = [];
+  document.getElementById('histCard').style.display = 'none';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+
+// ── WAV Recorder ──────────────────────────────────────────────────────────────
+// Records raw PCM from the browser's AudioContext and packages it as a
+// proper 16-bit WAV blob. This is what the Flask backend can read with soundfile.
+
 function WavRecorder(source) {
   this.source = source;
-  this.chunks = [];
+  this.buffers = [];
   this.active = false;
   var self = this;
 
-  this.processor = source.context.createScriptProcessor(4096, 1, 1);
-  this.processor.onaudioprocess = function(e) {
-    if (self.active) {
-      self.chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-    }
+  // ScriptProcessorNode is deprecated but still universally supported.
+  // AudioWorklet would be the modern way but needs HTTPS + extra setup.
+  this.proc = source.context.createScriptProcessor(4096, 1, 1);
+  this.proc.onaudioprocess = function(e) {
+    if (!self.active) return;
+    var input = e.inputBuffer.getChannelData(0);
+    self.buffers.push(new Float32Array(input));
   };
-  source.connect(this.processor);
-  this.processor.connect(source.context.destination);
+  source.connect(this.proc);
+  this.proc.connect(source.context.destination);
 }
 
 WavRecorder.prototype.start = function() {
@@ -565,58 +785,65 @@ WavRecorder.prototype.start = function() {
 
 WavRecorder.prototype.stop = function() {
   this.active = false;
-  this.processor.disconnect();
+  this.proc.disconnect();
   this.source.disconnect();
 
-  // merge all chunks into one array
+  // flatten all captured chunks
   var totalLen = 0;
-  for (var i = 0; i < this.chunks.length; i++) {
-    totalLen += this.chunks[i].length;
-  }
+  for (var i = 0; i < this.buffers.length; i++) totalLen += this.buffers[i].length;
   var merged = new Float32Array(totalLen);
-  var pos = 0;
-  for (var i = 0; i < this.chunks.length; i++) {
-    merged.set(this.chunks[i], pos);
-    pos += this.chunks[i].length;
+  var offset = 0;
+  for (var j = 0; j < this.buffers.length; j++) {
+    merged.set(this.buffers[j], offset);
+    offset += this.buffers[j].length;
   }
-
-  return buildWav(merged, 16000);
+  return buildWavBlob(merged, 16000);
 };
 
-function buildWav(samples, sampleRate) {
+function buildWavBlob(samples, sampleRate) {
   var numSamples = samples.length;
-  var buf = new ArrayBuffer(44 + numSamples * 2);
+  var byteLen = 44 + numSamples * 2; // 16-bit = 2 bytes per sample
+  var buf = new ArrayBuffer(byteLen);
   var view = new DataView(buf);
 
-  function writeStr(offset, str) {
-    for (var i = 0; i < str.length; i++) {
-      view.setUint8(offset + i, str.charCodeAt(i));
-    }
+  function str(offset, s) {
+    for (var i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
   }
 
-  writeStr(0, 'RIFF');
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeStr(8, 'WAVE');
-  writeStr(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);  // PCM
-  view.setUint16(22, 1, true);  // mono
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  writeStr(36, 'data');
+  str(0,  'RIFF');
+  view.setUint32(4,  byteLen - 8,   true);
+  str(8,  'WAVE');
+  str(12, 'fmt ');
+  view.setUint32(16, 16,            true);  // PCM chunk size
+  view.setUint16(20, 1,             true);  // PCM format
+  view.setUint16(22, 1,             true);  // mono
+  view.setUint32(24, sampleRate,    true);
+  view.setUint32(28, sampleRate * 2, true); // byte rate
+  view.setUint16(32, 2,             true);  // block align
+  view.setUint16(34, 16,            true);  // bits per sample
+  str(36, 'data');
   view.setUint32(40, numSamples * 2, true);
 
-  var offset = 44;
-  for (var i = 0; i < numSamples; i++) {
-    var s = Math.max(-1, Math.min(1, samples[i]));
-    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-    offset += 2;
+  var idx = 44;
+  for (var k = 0; k < numSamples; k++) {
+    // clamp float32 to [-1, 1] then scale to int16
+    var s = Math.max(-1, Math.min(1, samples[k]));
+    view.setInt16(idx, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    idx += 2;
   }
 
   return new Blob([buf], { type: 'audio/wav' });
 }
+
+// init pipeline display
+pipeStep(999); // nothing lit
+document.getElementById('p0').classList.remove('on','ok');
+document.getElementById('p1').classList.remove('on','ok');
+document.getElementById('p2').classList.remove('on','ok');
+document.getElementById('p3').classList.remove('on','ok');
+document.getElementById('p4').classList.remove('on','ok');
+document.getElementById('p5').classList.remove('on','ok');
+document.getElementById('p6').classList.remove('on','ok');
 </script>
 </body>
 </html>
