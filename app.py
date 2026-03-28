@@ -85,6 +85,12 @@ def translate():
             audio = sig.resample(audio, n).astype(np.float32)
             rate = 16000
 
+        # Normalize audio level to a consistent peak so VAD and ASR
+        # work reliably regardless of mic volume or upload loudness
+        peak = np.max(np.abs(audio))
+        if peak > 1e-7:
+            audio = audio / peak * 0.9
+
         # apply noise filter only for mic recordings — uploaded files are
         # usually already good quality and the filter can hurt accuracy
         is_upload = request.form.get('is_upload', 'false') == 'true'

@@ -15,6 +15,15 @@ SCRIPT_PROMPTS = {
     'de': 'Dieser Satz ist auf Deutsch.',
     'fr': 'Cette phrase est en français.',
     'es': 'Esta frase está en español.',
+    'pt': 'Esta frase está em português.',
+    'it': 'Questa frase è in italiano.',
+    'nl': 'Deze zin is in het Nederlands.',
+    'pl': 'To zdanie jest po polsku.',
+    'tr': 'Bu cümle Türkçedir.',
+    'uk': 'Це речення українською мовою.',
+    'id': 'Kalimat ini dalam bahasa Indonesia.',
+    'vi': 'Câu này bằng tiếng Việt.',
+    'th': 'ประโยคนี้เป็นภาษาไทย',
 }
 
 def get_text(audio, lang=None):
@@ -24,8 +33,12 @@ def get_text(audio, lang=None):
         "beam_size": 5,
         "fp16": False,
         "condition_on_previous_text": False,
-        "no_speech_threshold": 0.4,
-        "logprob_threshold": -1.0,
+        # Use temperature fallback: start with greedy, increase if needed
+        "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
+        # Looser thresholds — let Whisper return output even with lower confidence
+        "no_speech_threshold": 0.6,
+        "logprob_threshold": -2.0,
+        "compression_ratio_threshold": 2.4,
     }
     if lang:
         options["language"] = lang
