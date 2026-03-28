@@ -15,6 +15,12 @@ from translator import do_translate
 
 app = Flask(__name__)
 
+
+@app.route('/favicon.ico')
+def favicon():
+    return '', 204
+
+
 # some languages have different codes between Whisper and gTTS
 LANG_FIX = {
     'zh': 'zh-CN',
@@ -147,6 +153,15 @@ def translate():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+
+if os.environ.get("PRELOAD_WHISPER", "").lower() in ("1", "true", "yes"):
+    try:
+        from model import get_model
+        get_model()
+    except Exception as e:
+        print("Whisper preload failed (will load on first request):", e)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)

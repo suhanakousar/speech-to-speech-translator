@@ -66,7 +66,7 @@ python app.py
 
 Open **http://localhost:5000** in Chrome or Firefox (microphone permission required).
 
-**First launch:** Whisper downloads the **`medium`** model (on the order of **~1.5 GB**). It is cached; later starts are faster.
+**First launch:** Whisper downloads the model you configure (default **`medium`**, **~1.5 GB**). Weights are cached under your user cache; later starts are faster. For smaller disk/RAM, set **`WHISPER_MODEL=base`** (~140 MB) or **`small`**.
 
 ---
 
@@ -119,7 +119,7 @@ Successful JSON includes `original_text`, `translated_text`, `src_lang`, `tgt_la
 |------|------|
 | `app.py` | Flask app, `/translate` |
 | `s2st_app.html` | Front-end UI |
-| `model.py` | Whisper model load (`medium`) |
+| `model.py` | Whisper model load (see `WHISPER_MODEL`) |
 | `asr.py` | Speech recognition |
 | `lid.py` | Language identification |
 | `vad.py` | Voice activity detection |
@@ -130,9 +130,32 @@ Successful JSON includes `original_text`, `translated_text`, `src_lang`, `tgt_la
 
 ---
 
-## Production note
+## Production (e.g. Render)
 
-`requirements.txt` includes **gunicorn** for deploying behind a process manager; bind and workers depend on your host. For local development, `python app.py` is enough.
+Hosted tiers often use **short HTTP timeouts** and **limited RAM**. The default **`medium`** model is large (~1.4 GB download, heavy RAM). If the first request tries to **download** the full checkpoint inside Gunicorn, the worker can hit **WORKER TIMEOUT** or **OOM** before finishing.
+
+**Recommended on Render (or similar):**
+
+1. Set environment variable **`WHISPER_MODEL=base`** (or `small`) unless you use a plan with enough RAM for `medium`.
+2. **Cache weights at build time** so the running dyno does not download on first `/translate`:
+
+   ```bash
+   pip install -r requirements.txt && python download_whisper.py
+   ```
+
+   Use the **same** `WHISPER_MODEL` in the build environment as in runtime.
+
+3. Start with **gunicorn** using the included config (long timeout, single worker by default):
+
+   ```bash
+   gunicorn -c gunicorn.conf.py app:app
+   ```
+
+   A **`Procfile`** is included for platforms that read it. Tune **`GUNICORN_TIMEOUT`** (default **300** seconds) if needed.
+
+4. Optional: **`PRELOAD_WHISPER=true`** loads Whisper when the worker imports the app (faster first request; slightly slower deploy boot).
+
+Local development: `python app.py` is enough; you do not need gunicorn.
 
 ---
 
