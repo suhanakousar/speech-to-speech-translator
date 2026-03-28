@@ -625,9 +625,11 @@ function processAudio(blob) {
   }, 1500);
 
   var tgtLang = document.getElementById('tgtL').value;
+  var srcLang = document.getElementById('srcL').value;
   var form = new FormData();
   form.append('audio', blob, 'recording.wav');
   form.append('target_lang', tgtLang);
+  form.append('src_lang', srcLang);
 
   fetch('/translate', { method: 'POST', body: form })
     .then(function(resp) { return resp.json(); })

@@ -92,20 +92,28 @@ def translate():
         if not has_voice(audio):
             return jsonify({'error': 'No voice detected. Try speaking louder.'}), 400
 
-        # detect language
-        src_lang, confidence = find_language(audio)
-        print(f"Detected language: {src_lang} ({confidence:.0%})")
+        # use user-selected source language if given, otherwise auto-detect
+        selected_src = request.form.get('src_lang', 'auto').strip()
+        if selected_src and selected_src != 'auto':
+            src_lang = selected_src
+            confidence = 1.0
+            print(f"Source language set by user: {src_lang}")
+        else:
+            src_lang, confidence = find_language(audio)
+            print(f"Detected language: {src_lang} ({confidence:.0%})")
 
-        # transcribe
+        # transcribe — pass the language so Whisper uses the right one
         text = get_text(audio, src_lang)
         print(f"Transcribed: {text!r}")
 
         if not text:
             return jsonify({'error': 'Could not transcribe speech. Please try again.'}), 400
 
-        # translate
+        # translate — use 'auto' as source so Google Translate detects the
+        # actual script of the transcribed text (Whisper sometimes outputs
+        # a different script than expected, e.g. Devanagari for Telugu)
         tgt_lang = request.form.get('target_lang', 'en').strip()
-        translated = do_translate(text, src_lang, tgt_lang)
+        translated = do_translate(text, 'auto', tgt_lang)
         print(f"Translated: {translated!r}")
 
         # text to speech
