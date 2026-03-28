@@ -125,7 +125,8 @@ def translate():
         translated = do_translate(text, 'auto', tgt_lang)
         print(f"Translated: {translated!r}")
 
-        # text to speech
+        # text to speech — both original and translated
+        original_audio_b64 = make_tts(text, fix_lang(src_lang))
         audio_b64 = make_tts(translated, tgt_lang)
 
         return jsonify({
@@ -134,6 +135,7 @@ def translate():
             'src_lang': src_lang,
             'tgt_lang': tgt_lang,
             'confidence': float(confidence),
+            'original_audio_b64': original_audio_b64,
             'audio_b64': audio_b64
         })
 

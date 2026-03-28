@@ -399,6 +399,10 @@ input[type=range] { flex: 1; accent-color: var(--acc); cursor: pointer; height: 
         <button class="cpybtn" onclick="doCopy('origSpan')">Copy</button>
       </div>
       <div class="rbtxt" id="origSpan"></div>
+      <div style="margin-top:10px">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">Original audio</div>
+        <audio id="origAudioPlayer" controls style="width:100%;height:36px;border-radius:8px;accent-color:var(--acc);"></audio>
+      </div>
     </div>
 
     <div style="margin-bottom:6px">
@@ -462,6 +466,7 @@ var audioCtx = null;
 var recorderObj = null;
 var timerInt = null;
 var lastAudioB64 = '';
+var lastOrigAudioB64 = '';
 var lastTgtLang = 'hi';
 var hist = [];
 var stats = { total: 0, langs: {}, times: [] };
@@ -644,12 +649,30 @@ function processAudio(blob, isUpload) {
 
       // store for history replay and play button
       lastAudioB64 = data.audio_b64;
+      lastOrigAudioB64 = data.original_audio_b64 || '';
       lastTgtLang = data.tgt_lang;
+
+      // populate both audio players
+      var origPlayer = document.getElementById('origAudioPlayer');
+      origPlayer.src = 'data:audio/mp3;base64,' + lastOrigAudioB64;
+      origPlayer.load();
+
+      var transPlayer = document.getElementById('audioPlayer');
+      transPlayer.src = 'data:audio/mp3;base64,' + lastAudioB64;
+      transPlayer.load();
 
       addHist(data.original_text, data.translated_text, data.src_lang, data.tgt_lang, data.audio_b64);
 
-      // auto-play the result
-      playAudio(data.audio_b64);
+      // auto-play original first, then translated when it ends
+      origPlayer.onended = function() {
+        transPlayer.play().catch(function(e) {
+          console.warn('Autoplay blocked for translation:', e.message);
+        });
+      };
+      origPlayer.play().catch(function(e) {
+        console.warn('Autoplay blocked for original, playing translated directly:', e.message);
+        transPlayer.play().catch(function() {});
+      });
     })
     .catch(function(err) {
       setStatus('Server error — is the Flask server running?', 'err');
