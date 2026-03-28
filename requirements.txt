@@ -1,0 +1,9 @@
+flask
+numpy
+scipy
+soundfile
+openai-whisper
+deep-translator
+gTTS
+pydub
+sounddevice
