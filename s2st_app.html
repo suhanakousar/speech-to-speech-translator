@@ -594,7 +594,7 @@ function submitUpload() {
   errBox.classList.remove('show');
   setStatus('Uploading file...', 'loading');
   pipeStep(0);
-  processAudio(uploadedFile);
+  processAudio(uploadedFile, true);
   // reset so user can upload again
   document.getElementById('uploadFileName').textContent = '';
   document.getElementById('uploadBtn').style.display = 'none';
@@ -602,7 +602,7 @@ function submitUpload() {
   uploadedFile = null;
 }
 
-function processAudio(blob) {
+function processAudio(blob, isUpload) {
   var t0 = Date.now();
 
   // walk the pipeline visually with slight delays so the user can see progress
@@ -627,9 +627,10 @@ function processAudio(blob) {
   var tgtLang = document.getElementById('tgtL').value;
   var srcLang = document.getElementById('srcL').value;
   var form = new FormData();
-  form.append('audio', blob, 'recording.wav');
+  form.append('audio', blob, isUpload ? blob.name || 'upload.audio' : 'recording.wav');
   form.append('target_lang', tgtLang);
   form.append('src_lang', srcLang);
+  form.append('is_upload', isUpload ? 'true' : 'false');
 
   fetch('/translate', { method: 'POST', body: form })
     .then(function(resp) { return resp.json(); })

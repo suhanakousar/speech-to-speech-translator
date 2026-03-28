@@ -85,8 +85,11 @@ def translate():
             audio = sig.resample(audio, n).astype(np.float32)
             rate = 16000
 
-        # clean up noise
-        audio = clean(audio, rate)
+        # apply noise filter only for mic recordings — uploaded files are
+        # usually already good quality and the filter can hurt accuracy
+        is_upload = request.form.get('is_upload', 'false') == 'true'
+        if not is_upload:
+            audio = clean(audio, rate)
 
         # check that someone actually spoke
         if not has_voice(audio):
