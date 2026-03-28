@@ -695,9 +695,11 @@ function processAudio(blob, isUpload) {
     });
 }
 
-function playAudio(b64) {
+function playAudio(b64, audioElId) {
   if (!b64) return;
-  var player = document.getElementById('audioPlayer');
+  var id = audioElId || 'audioPlayer';
+  var player = document.getElementById(id);
+  if (!player) return;
   player.src = 'data:audio/mp3;base64,' + b64;
   player.load();
   player.play().catch(function(e) {
@@ -711,7 +713,7 @@ function doPlayOrig() {
     return;
   }
   setStatus('Playing original...', 'loading');
-  playAudio(lastOrigAudioB64);
+  playAudio(lastOrigAudioB64, 'origAudioPlayer');
 }
 
 function doPlay() {
@@ -720,7 +722,7 @@ function doPlay() {
     return;
   }
   setStatus('Playing translated...', 'loading');
-  playAudio(lastAudioB64);
+  playAudio(lastAudioB64, 'audioPlayer');
 }
 
 function doDownload() {
