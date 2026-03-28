@@ -427,8 +427,11 @@ input[type=range] { flex: 1; accent-color: var(--acc); cursor: pointer; height: 
     </div>
 
     <div class="btnrow">
+      <button class="abtn pri" onclick="doPlayOrig()">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play original
+      </button>
       <button class="abtn pri" onclick="doPlay()">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play audio
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play translated
       </button>
       <button class="abtn grn" onclick="doDownload()">
         <svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7z"/></svg>Save .txt
@@ -654,12 +657,22 @@ function processAudio(blob, isUpload) {
 
       // populate both audio players
       var origPlayer = document.getElementById('origAudioPlayer');
-      origPlayer.src = 'data:audio/mp3;base64,' + lastOrigAudioB64;
+      if (lastOrigAudioB64) {
+        origPlayer.src = 'data:audio/mp3;base64,' + lastOrigAudioB64;
+      } else {
+        origPlayer.src = '';
+      }
       origPlayer.load();
 
       var transPlayer = document.getElementById('audioPlayer');
-      transPlayer.src = 'data:audio/mp3;base64,' + lastAudioB64;
+      if (lastAudioB64) {
+        transPlayer.src = 'data:audio/mp3;base64,' + lastAudioB64;
+      } else {
+        transPlayer.src = '';
+      }
       transPlayer.load();
+
+      console.log('origPlayer.src', origPlayer.src, 'transPlayer.src', transPlayer.src);
 
       addHist(data.original_text, data.translated_text, data.src_lang, data.tgt_lang, data.audio_b64);
 
@@ -692,12 +705,21 @@ function playAudio(b64) {
   });
 }
 
-function doPlay() {
-  if (!lastAudioB64) {
-    setStatus('No audio yet — record something first', 'err');
+function doPlayOrig() {
+  if (!lastOrigAudioB64) {
+    setStatus('No original audio yet — record something first', 'err');
     return;
   }
-  setStatus('Playing...', 'loading');
+  setStatus('Playing original...', 'loading');
+  playAudio(lastOrigAudioB64);
+}
+
+function doPlay() {
+  if (!lastAudioB64) {
+    setStatus('No translated audio yet — record something first', 'err');
+    return;
+  }
+  setStatus('Playing translated...', 'loading');
   playAudio(lastAudioB64);
 }
 

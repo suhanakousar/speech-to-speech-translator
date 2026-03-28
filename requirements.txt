@@ -1,3 +1,4 @@
+certifi
 flask
 numpy
 scipy
@@ -7,15 +8,6 @@ deep-translator
 gTTS
 pydub
 sounddevice
-deep-translator
-flask
-gTTS
-numpy
-openai-whisper
-pydub
-scipy
-sounddevice
-soundfile
 whisper
 deep-translator
 flask

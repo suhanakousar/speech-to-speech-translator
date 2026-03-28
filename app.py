@@ -129,6 +129,10 @@ def translate():
         original_audio_b64 = make_tts(text, fix_lang(src_lang))
         audio_b64 = make_tts(translated, tgt_lang)
 
+        # debug info to catch 0:00 duration cases
+        print('original_audio_b64 length', len(original_audio_b64))
+        print('audio_b64 length', len(audio_b64))
+
         return jsonify({
             'original_text': text,
             'translated_text': translated,
