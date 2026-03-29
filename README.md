@@ -39,6 +39,59 @@ flowchart LR
 
 ---
 
+## Live speech translation: end-to-end flow
+
+This is what happens when you use the **web UI** so you can reason about timing, permissions, and outputs.
+
+### Record tab (microphone)
+
+1. **Languages** — Set **source** (or **Auto-detect**) and **target**. You can use **⇄** to swap. Auto-detect runs **after** capture using the audio itself; a fixed source skips detection and forces Whisper to that language.
+2. **Permission** — Click the mic. The browser asks for **microphone** access; you must allow it for this site.
+3. **Capture** — Recording uses the **Web Audio API** at **16 kHz** mono. Audio is accumulated into a **WAV** blob in the page (no streaming ASR — the full clip is sent when you stop).
+4. **Stop** — Click the mic again to stop **early**, or wait until the **max duration** slider (3–15 seconds) ends; the clip is packaged and sent to the server.
+5. **Server processing** — The backend loads the WAV, makes it mono, **resamples to 16 kHz** if needed, **normalizes** level, applies **noise suppression** (mic path only), runs **VAD**, then **LID** (if source is Auto), **Whisper** transcription, **translation**, and **gTTS** for both original wording and translation.
+6. **Results** — You get **original text**, **translated text**, a **language-confidence** bar (meaningful when source was Auto), and two **MP3** players (**original** and **translated** speech). The UI tries to **auto-play** original audio, then translated (browsers may block autoplay; use the play buttons if needed).
+7. **Extras** — **Copy** text, **Save .txt**, **Share** (native share or clipboard), **History** (last items with replay), and **Record again** to clear the result panel.
+
+### What “live” means here
+
+The app is **not** a real-time streaming interpreter: each request is **one recorded segment** processed as a batch. Latency comes from upload + Whisper + translate + TTS. For short clips this still feels interactive; very long files are better handled via **Upload** (same pipeline, different input).
+
+---
+
+## Uploading audio (file instead of mic)
+
+Use the **Upload** tab when you already have a file (podcast clip, exported voice memo, screen recording audio, etc.).
+
+### How to upload
+
+1. Switch to **Upload** (next to **Record**).
+2. **Click** the dashed area to pick a file, or **drag and drop** a file onto it.
+3. The UI shows the **file name and size**. Click **Translate this file** to run the pipeline. The file input clears after submit so you can upload another file.
+
+### Formats
+
+- **Preferred:** **WAV** (read directly; fastest path).
+- **Also supported:** Typical browser/OS audio types such as **MP3, OGG, M4A, WEBM** — these are converted with **pydub** + **ffmpeg** to mono **16 kHz** WAV internally.
+
+If conversion fails, install **ffmpeg**, confirm the file is not corrupt, and try exporting to **WAV** from an editor.
+
+### How upload differs from microphone
+
+| Aspect | Microphone (`Record`) | File (`Upload`) |
+|--------|------------------------|-----------------|
+| `is_upload` sent to API | `false` | `true` |
+| **Noise suppression** | Applied | **Skipped** (assumes file is already usable; suppression can hurt clean studio audio) |
+| Everything else | Same: normalize → VAD → LID or fixed source → Whisper → translate → gTTS | Same |
+
+So uploads still go through **VAD** (silence / no speech is rejected), **Whisper**, and the rest — only the optional denoise step is omitted.
+
+### API note for uploads
+
+`POST /translate` accepts multipart form fields: `audio` (file), `src_lang`, `target_lang`, and `is_upload` (`"true"` / `"false"`). Integrators sending pre-recorded audio should set **`is_upload=true`** when the audio was not captured from a noisy live mic.
+
+---
+
 ## Requirements
 
 - **Python** 3.9+ (3.10+ recommended)  
@@ -75,9 +128,9 @@ Open **http://localhost:5000** in Chrome or Firefox (microphone permission requi
 ### Web UI
 
 1. Choose **source** language or **Auto-detect**, and a **target** language.  
-2. Use the **mic** to record, or **upload** a file.  
-3. Wait for transcription, translation, and optional playback.  
-4. Use **Play**, **Save** (`.txt`), or **Share** (clipboard) as needed.
+2. **Record** — see [Live speech translation: end-to-end flow](#live-speech-translation-end-to-end-flow). **Upload** — see [Uploading audio](#uploading-audio-file-instead-of-mic).  
+3. Wait for transcription, translation, and playback (or use the audio controls if autoplay is blocked).  
+4. Use **Play original** / **Play translated**, **Save** (`.txt`), **Share**, or **History** as needed.
 
 ### CLI (no browser)
 
@@ -98,7 +151,18 @@ Follow the prompts; the CLI uses `recorder.py`, `tts.py`, and the same core modu
 | `GET` | `/` | Serves the web UI |
 | `POST` | `/translate` | Multipart form: `audio` (file), optional `src_lang`, `target_lang`, `is_upload` |
 
-Successful JSON includes `original_text`, `translated_text`, `src_lang`, `tgt_lang`, `confidence`, `original_audio_b64`, `audio_b64` (MP3, base64).
+**Form fields**
+
+| Field | Meaning |
+|-------|---------|
+| `audio` | Raw file bytes (WAV or anything **ffmpeg**/`pydub` can decode). |
+| `src_lang` | Whisper/source language code, or `auto` (default) for LID on the server. |
+| `target_lang` | Desired translation language (default `en`). |
+| `is_upload` | String `true` or `false`: if `true`, **noise suppression is not** applied (see [upload vs mic](#how-upload-differs-from-microphone)). |
+
+**JSON response (success)**
+
+`original_text`, `translated_text`, `src_lang`, `tgt_lang`, `confidence` (1.0 when the user fixed the source language; otherwise from LID), `original_audio_b64`, `audio_b64` (MP3, base64).
 
 ---
 
@@ -109,6 +173,7 @@ Successful JSON includes `original_text`, `translated_text`, `src_lang`, `tgt_la
 | **500** errors | Terminal traceback from `app.py`; confirm **ffmpeg** and all **pip** packages. |
 | **No voice detected** | Louder/closer mic; default input device; less background noise. |
 | **Browser blocks mic** | Allow microphone for this site; reset permission via the address bar lock icon. |
+| **Upload fails or 500 on non-WAV** | Ensure **ffmpeg** is installed and on `PATH`; try a **WAV** export. |
 | **Slow first run** | Expected while **Whisper medium** downloads and loads. |
 
 ---
