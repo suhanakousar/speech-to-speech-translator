@@ -29,6 +29,12 @@ flowchart LR
   G --> H[gTTS playback]
 ```
 
+### System architecture
+
+The diagram below is a **separate, high-level architecture view** of the same system (components and data paths), complementary to the linear pipeline above.
+
+![System architecture diagram](images/system_flow.jpg)
+
 1. **Ingest** — WAV directly, or WebM/OGG via **pydub** + **ffmpeg**.  
 2. **Preprocess** — Mono, **16 kHz**, peak normalization. Mic recordings get **noise suppression**; uploads skip it to avoid hurting clean files.  
 3. **VAD** — Rejects silence / no-speech.  
@@ -36,6 +42,40 @@ flowchart LR
 5. **ASR** — **Whisper** (`medium` in `model.py`) with script-oriented prompts for several languages.  
 6. **Translation** — **deep-translator** (Google Translate); source is passed as `auto` on transcribed text for robust script handling.  
 7. **TTS** — **gTTS**; original and translated audio are returned as **base64** MP3 in the web API.
+
+---
+
+## Screenshots
+
+### Main application interface (home screen)
+
+![Main application interface](images/pic1.png)
+
+The home screen of the Speech-to-Speech Translation system provides a clean and intuitive UI where users can select source and target languages, record live audio, or upload files. It includes real-time controls such as recording duration, language switching, and quick access to input modes.
+
+### Live speech translation output
+
+![Live speech translation output](images/pic2.png)
+
+This screen displays the real-time processing results of spoken input. The system shows the original transcribed text, detected language with confidence score, translated text, and audio playback for both original and translated speech, enabling a complete speech-to-speech experience.
+
+### Audio file upload interface
+
+![Audio file upload interface](images/pic3.png)
+
+Users can upload pre-recorded audio files in formats such as WAV, MP3, OGG, and M4A. The system processes uploaded files through the same pipeline, allowing flexible input beyond live microphone recording.
+
+### Uploaded audio translation result
+
+![Uploaded audio translation result](images/pic4.png)
+
+This view demonstrates the system’s ability to process uploaded audio files. It accurately detects the source language, transcribes speech into text, translates it into the target language, and generates corresponding audio output with high confidence.
+
+### Usage metrics dashboard
+
+![Usage metrics dashboard](images/pic5.png)
+
+The application includes a lightweight analytics section displaying key metrics such as total translations performed, number of languages used, and average processing latency, providing insights into system performance.
 
 ---
 
