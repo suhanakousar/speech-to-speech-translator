@@ -1,0 +1,11 @@
+.venv/
+.venv-1/
+.cache/
+*.wav
+*.mp3
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.DS_Store
