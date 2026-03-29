@@ -3,6 +3,8 @@
 **Speak in one language. Hear the answer in another.**  
 This project runs a full **speech → text → translate → speech** pipeline locally: your microphone (or an uploaded clip) is cleaned, checked for voice, identified by language, transcribed with OpenAI Whisper, translated with Google Translate, and read back with text-to-speech.
 
+> **Accuracy warning:** **Whisper is not perfect** (no ASR is). Noisy audio, accents, fast speech, rare words, or a wrong source-language guess can change the transcript. Translation and TTS are driven by that text, so **translated wording and spoken output can differ** from what you intended or from one run to the next. Smaller Whisper models are faster but usually less accurate than larger ones.
+
 ---
 
 ## Why this exists
@@ -51,31 +53,31 @@ The diagram below is a **separate, high-level architecture view** of the same sy
 
 ![Main application interface](images/pic1.png)
 
-The home screen of the Speech-to-Speech Translation system provides a clean and intuitive UI where users can select source and target languages, record live audio, or upload files. It includes real-time controls such as recording duration, language switching, and quick access to input modes.
+Source/target languages, recording length, and Record vs Upload.
 
 ### Live speech translation output
 
 ![Live speech translation output](images/pic2.png)
 
-This screen displays the real-time processing results of spoken input. The system shows the original transcribed text, detected language with confidence score, translated text, and audio playback for both original and translated speech, enabling a complete speech-to-speech experience.
+Transcript, detected language (with confidence when using auto-detect), translation, and playback for original and translated audio.
 
 ### Audio file upload interface
 
 ![Audio file upload interface](images/pic3.png)
 
-Users can upload pre-recorded audio files in formats such as WAV, MP3, OGG, and M4A. The system processes uploaded files through the same pipeline, allowing flexible input beyond live microphone recording.
+Drag-and-drop or file picker; same pipeline as the microphone after the file is loaded.
 
 ### Uploaded audio translation result
 
 ![Uploaded audio translation result](images/pic4.png)
 
-This view demonstrates the system’s ability to process uploaded audio files. It accurately detects the source language, transcribes speech into text, translates it into the target language, and generates corresponding audio output with high confidence.
+Result view for an uploaded file: language detection, text, and TTS output.
 
 ### Usage metrics dashboard
 
 ![Usage metrics dashboard](images/pic5.png)
 
-The application includes a lightweight analytics section displaying key metrics such as total translations performed, number of languages used, and average processing latency, providing insights into system performance.
+Simple counters and latency summary for recent runs.
 
 ---
 
