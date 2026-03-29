@@ -9,3 +9,10 @@ __pycache__/
 .Python
 *.so
 .DS_Store
+
+# never commit keys or PEM material
+y
+y.pub
+*.pem
+id_rsa
+id_rsa.pub
